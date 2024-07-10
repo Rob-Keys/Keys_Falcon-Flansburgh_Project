@@ -34,4 +34,11 @@ head(Data)
 
 ```
 
+```{r}
+# MLR, Emotional Wellbeing as response variable, I consider myself an athlete, most of my friends are athletes, and Sport is the most important part of my life as predictors
+Emo_Data <- Data %>% select(`Emotional Wellbeing`, `I consider myself an athlete`, `most of my friends are athletes`, `Sport is the most important part of my life`)
+Emo_Data <- Emo_Data %>% filter(`I consider myself an athlete` < 999)
+Emo_Well_Fit <- lm(Emo_Data$`Emotional Wellbeing` ~ Emo_Data$`I consider myself an athlete` + Emo_Data$`most of my friends are athletes` + Emo_Data$`Sport is the most important part of my life`)
+summary(Emo_Well_Fit)
 
+```
