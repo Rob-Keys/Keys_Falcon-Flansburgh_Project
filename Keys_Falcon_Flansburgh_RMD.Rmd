@@ -17,6 +17,7 @@ When you click the **Knit** button a document will be generated that includes bo
 # Libraries
 library(readr)
 library(dplyr)
+library(ggplot2)
 ```
 
 ```{r}
@@ -40,5 +41,13 @@ Emo_Data <- Data %>% select(`Emotional Wellbeing`, `I consider myself an athlete
 Emo_Data <- Emo_Data %>% filter(`I consider myself an athlete` < 999)
 Emo_Well_Fit <- lm(Emo_Data$`Emotional Wellbeing` ~ Emo_Data$`I consider myself an athlete` + Emo_Data$`most of my friends are athletes` + Emo_Data$`Sport is the most important part of my life`)
 summary(Emo_Well_Fit)
+```
+```{r}
+# Emotional Wellbeing as a function of Weeks Social Distancing 
 
+ggplot(Data, aes(x=Data$`Weeks Social Distancing`, y=Data$`Emotional Wellbeing`, color=factor(Data$`Athlete/Non-Athlete`)))+
+geom_point()+
+geom_smooth(method=lm, se=FALSE)
+Emo_Weeks_Fit <- lm(Data$`Emotional Wellbeing` ~ Data$`Weeks Social Distancing`*as.factor(Data$`Athlete/Non-Athlete`), data = Data)
+summary(Emo_Weeks_Fit)
 ```
