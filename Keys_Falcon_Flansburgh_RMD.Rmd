@@ -57,21 +57,21 @@ Emo_Weeks_Fit <- lm(Data$`Emotional Wellbeing` ~ Data$`Weeks Social Distancing`*
 summary(Emo_Weeks_Fit)
 ```
 ```{r}
-# Resilience (BRS) as a function of athletic identity (AIMS) 
-
-ai <- originalData %>% select(`AIMS_ TOTAL`, RES_TOTAL)
-ai <- ai %>% filter(`AIMS_ TOTAL` <= 100, RES_TOTAL <= 100)
+# MCH-SF (a way to measure wellbeing) as a function of athletic identity (AIMS)
+ai <- originalData %>% select(`AIMS_ TOTAL`, `MHC-SF OVERALL`)
+ai <- ai %>% filter(`AIMS_ TOTAL` <= 100, `MHC-SF OVERALL` <= 100)
 
 
 athleticIdentity <- ai %>% select('AIMS_ TOTAL')
-athleticIdentity = athleticIdentity[athleticIdentity < 100]
+athleticIdentity = athleticIdentity[athleticIdentity==athleticIdentity] # i know this is weird, idk why but this line converts it from a list to a plottable data type
 
-resilience <- ai %>% select('RES_TOTAL')
-resilience <- resilience[resilience < 100]
+happiness <- ai %>% select('MHC-SF OVERALL')
+happiness <- happiness[happiness==happiness]
 
-plot(athleticIdentity,resilience,main="Scatter")
-fit <- lm(athleticIdentity ~ resilience, data = ai)
-#plot(fit)
+plot(athleticIdentity,happiness,main="Scatter")
+fit <- lm(athleticIdentity ~ happiness, data = ai)
+abline(fit,col="red")
+plot(fit)
 summary(fit)
 ```
 
