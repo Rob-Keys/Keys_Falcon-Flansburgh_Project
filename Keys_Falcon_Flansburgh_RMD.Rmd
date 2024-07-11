@@ -18,6 +18,8 @@ When you click the **Knit** button a document will be generated that includes bo
 library(readr)
 library(dplyr)
 library(ggplot2)
+
+library(tidyverse)
 ```
 
 ```{r}
@@ -94,6 +96,22 @@ summary(specific_tree_model)
 
 
 ```{r warning=FALSE}
+#cross-validation of the above tree
+cv.specific <- cv.tree(specific_tree_model)
+cv.specific
+plot(cv.specific$size,cv.specific$dev,type='b')
+```
+
+
+```{r warning=FALSE}
+#pruning the above tree
+
+prune.specific <- prune.tree(specific_tree_model, best = 6)
+plot(prune.specific)
+text(prune.specific,pretty=0)
+```
+
+```{r warning=FALSE}
 #this tree only uses predictors that are related to sports and athletics
 morespecific_tree_model <- tree(cleanData$`Emotional Wellbeing` ~ cleanData$`Athlete/Non-Athlete` + cleanData$`AIMS_ TOTAL` + cleanData$`I consider myself an athlete` + cleanData$`I have many goals related to sport` + cleanData$`most of my friends are athletes` + cleanData$`Sport is the most important part of my life` + cleanData$`I spend more time thinking about sport than anything else` + cleanData$`I feel bad about myself when I do badly in sport` + cleanData$`I would be very depressed if I were injured and could not compete in sport`, data = training)
 plot(morespecific_tree_model)
@@ -107,9 +125,12 @@ print("Testing mse of non-pruned tree")
 mse
 ```
 
+
+
 ```{r warning=FALSE}
 #finding optimal tree size
-treeSize = c(6,5,4,3,1)
+cv.tree(morespecific_tree_model)
+tree_size = c(6,5,4,3,1)
 optimalSize=c()
 for(i in 1:100){
   optimalSize = c(optimalSize,tree_size[which.min(cv.tree(morespecific_tree_model)$dev)])
@@ -140,8 +161,9 @@ mse <- mean((testing$`Emotional Wellbeing` - prediction)^2)
 print("Testing mse of manually pruned tree")
 mse
 ```
-```
 
 ```{r warning=FALSE}
 #ANOVA Comparison between the mean well being of non athletes and the mean well being of athletes
+aov_results <- aov(cleanData$`Emotional Wellbeing` ~ factor(cleanData$`Athlete/Non-Athlete`))
+summary(aov_results)
 ```
