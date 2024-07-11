@@ -1,5 +1,6 @@
 ---
-title: "Keys_Falcon_Flansburgh_RMD"
+title: "Statistical Analysis of the Relationship Between Mental Health, Emotional Wellbeing, and Athletic Identity "
+author: "Falcon-Flansburgh, Victoria, and Keys, Rob"
 output: html_document
 date: "2024-07-10"
 ---
@@ -8,11 +9,11 @@ date: "2024-07-10"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+# Dataset 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+Our chosen dataset was collected in May of 2021 through an online questionnaire, where participants answered about their current emotional wellbeing and mental health, how athletics affected their self-identity, the impact athletics have in their life, the length of their covid isolation, and basic background information. The dataset has over 80 columns of data with 688 participants, with its large size allowing for complex analysis across data columns and an ample sample size. 
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+Data_Sheet_1_Comparing Mental Health of Athletes and Non-athletes as They Emerge From a COVID-19 Pandemic Lockdown.CSV (figshare.com) 
 ```{r}
 # Libraries
 library(readr)
@@ -193,4 +194,22 @@ summary(aov_results)
 fit <- lm(cleanData$`Emotional Wellbeing` ~ cleanData$`That you belonged to a community (like a social group or your neighbourhood)` + cleanData$`# in lockdown bubble:` + cleanData$`That you had warm and trusting relationships with others`)
 summary(fit)
 
+avPlots(fit)
 ```
+
+```{r warning=FALSE}
+#MLR backwards elim
+fit1 <- lm(cleanData$`Emotional Wellbeing` ~ + cleanData$`# in lockdown bubble:` + cleanData$`That you had warm and trusting relationships with others`)
+summary(fit1)
+
+fit2 <- lm(cleanData$`Emotional Wellbeing` ~ cleanData$`That you belonged to a community (like a social group or your neighbourhood)` + cleanData$`That you had warm and trusting relationships with others`)
+summary(fit2)
+
+fit3 <- lm(cleanData$`Emotional Wellbeing` ~ cleanData$`That you belonged to a community (like a social group or your neighbourhood)`)
+summary(fit3)
+
+```
+
+
+#Conclusions
+Athletes were no more or less likely to have mental health struggles in the wake of the COVID-19 pandemic. The linear regression for emotional wellbeing as a function of how important sports were to the person had an R^2 below 0.1 as did the regression model using weeks social distancing by athlete vs. non-athlete. The ANOVA tests had p-values above 0.2 so they did not show any significant difference between athletes vs. non-athletes. The regression tree with no limiting parameters and the tree with only some limiting parameters simply based the decision for emotional wellbeing off predictors like happiness or emotional resiliency, which is not useful data since there was no significant difference in those factors between athletes and non-athletes. The regression tree using only athletic parameters had a mean squared error of 9.54, which given that the maximum emotional wellbeing in the data is 15, is very high. The linear regression using belonging to a community, the number of people in the lockdown bubble, and feeling like they have loving relationships had an R^2 of 0.408, which shows some correlation. The main conclusion drawn given this data is that despite the inability to play sports during the lockdown, athletes did not suffer more emotional problems than non-athletes, and factors like their community, and their general wellbeing were far more important.
