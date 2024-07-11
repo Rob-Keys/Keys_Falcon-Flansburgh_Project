@@ -109,6 +109,12 @@ plot(cv.specific$size,cv.specific$dev,type='b')
 prune.specific <- prune.tree(specific_tree_model, best = 6)
 plot(prune.specific)
 text(prune.specific,pretty=0)
+
+#getting mse for pruned tree
+prediction <- round(predict(prune.specific, newdata = testing))
+mse <- mean((testing$`Emotional Wellbeing` - prediction)^2)
+print("Testing mse of pruned tree")
+mse
 ```
 
 ```{r warning=FALSE}
@@ -165,5 +171,12 @@ mse
 ```{r warning=FALSE}
 #ANOVA Comparison between the mean well being of non athletes and the mean well being of athletes
 aov_results <- aov(cleanData$`Emotional Wellbeing` ~ factor(cleanData$`Athlete/Non-Athlete`))
+summary(aov_results)
+```
+
+
+```{r warning=FALSE}
+#ANOVA Comparison between the mean resliency of non athletes and the mean well being of athletes
+aov_results <- aov(cleanData$`RES_TOTAL` ~ factor(cleanData$`Athlete/Non-Athlete`))
 summary(aov_results)
 ```
