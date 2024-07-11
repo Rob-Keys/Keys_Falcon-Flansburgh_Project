@@ -124,7 +124,7 @@ The code block below prunes the tree to its optimal size.
 
 prune.specific <- prune.tree(specific_tree_model, best = 6)
 plot(prune.specific)
-text(prune.specific,pretty=0)
+text(prune.specific,pretty=0, cex = 0.6)
 
 #getting mse for pruned tree
 prediction <- round(predict(prune.specific, newdata = testing))
@@ -186,8 +186,12 @@ mse
 The code below uses an ANOVA to see if there is a signifcant difference in the means of Emotional Wellbeing for Athletes vs. Non-Athletes.
 ```{r warning=FALSE}
 #ANOVA Comparison between the mean well being of non athletes and the mean well being of athletes
+cleanData$`Athlete/Non-Athlete`[cleanData$`Athlete/Non-Athlete` == 1] <- "Athlete"
+cleanData$`Athlete/Non-Athlete`[cleanData$`Athlete/Non-Athlete` == 2] <- "Non-Athlete"
+
 aov_results <- aov(cleanData$`Emotional Wellbeing` ~ factor(cleanData$`Athlete/Non-Athlete`))
 summary(aov_results)
+boxplot(cleanData$`Emotional Wellbeing` ~ factor(cleanData$`Athlete/Non-Athlete`), col = c("red", "blue"))
 ```
 The code below uses an ANOVA to see if there is a signifcant difference in the means of Resiliency Total for Athletes vs. Non-Athletes.
 
