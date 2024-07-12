@@ -91,6 +91,8 @@ summary(Emo_Weeks_Fit)
 
 *Analysis*
 
+The regression line for athletes and non athletes shows that athletes' emotional wellbeing has a positive correlation with weeks spent social distancing, while non-athletes' emotional wellbeing has a negative correlation. This could be due to a variety of factors associated with being an athlete, but would suggest that athletes seemed to handle the social reduction better than non-athletes, actually having social distancing improve their mental health, compared to the expected result of a negative correlation like non-athletes showed. However, none of the p values are less than 0.05, and therefore this data is statistically insignificant, and we cannot draw any conclusions from it.
+
 # Logistic Regression
 
 *Data cleaning*
@@ -119,7 +121,7 @@ log_model <- glm(as.factor(`Athlete/Non-Athlete`) ~ `Emotional Wellbeing` + `Soc
 summary(log_model)
 
 test_pred <- predict(log_model, testing, type = "response")
-prediction <- ifelse(test_pred > 0.5, 1, 0)
+prediction <- ifelse(test_pred > 0.50, 1, 0)
 
 confusion_matrix <- table(Predicted = prediction, Actual = testing$`Athlete/Non-Athlete`)
 confusion_matrix
@@ -127,11 +129,13 @@ confusion_matrix
 
 *Analysis*
 
-# Multiple Linear Regression
+Interpreting the coefficients of our log model shows that per unit increase in emotional wellbeing, the log odds of the individual being an athlete decreases by 0.009, per unit increase in social wellbeing, the log odds of being an athlete increase by 0.024, and per unit increase in psychological wellbeing, the log odds decrease by 0.015. This would suggest that athletes have better social well-being, potentially due team sports and sports communities, but they also have worse emotional and psychological wellbeing coming out of the lockdown. However, none of tbe p values are significant (\<0.05), and therefore we cannot draw conclusions from the data.
+
+# Paired variables graphs
 
 *Data cleaning*
 
-This code block creates and filters the data to the necessary variables for our future multiple line regression.
+This code block creates and filters the data to the necessary variables for our future variable pairing
 
 ```{r}
 mlrData <- originalData %>% select(`MHC-SF OVERALL`,`AIMS_ TOTAL`,`I consider myself an athlete`,`I have many goals related to sport`,`most of my friends are athletes`,`Sport is the most important part of my life`,`I spend more time thinking about sport than anything else`,`I feel bad about myself when I do badly in sport`,`I would be very depressed if I were injured and could not compete in sport`)
@@ -141,16 +145,15 @@ mlrData <- mlrData %>% filter(`AIMS_ TOTAL` <= 100, `MHC-SF OVERALL` <= 100,`I c
 
 *Model Building*
 
-This code block creates a multiple line regression model that attempts to find the relationship between a comprehensive metric of mental health and athletic identity-relating variables
+This code block creates graphs to illustrate the relationship between a series of athletic variables to 'MHC-SF Overall', a comprehensive mental health statistic created by using other survey answers.
 
 ```{r}
-
-fit <- lm(mlrData$`MHC-SF OVERALL` ~ mlrData$`AIMS_ TOTAL`+mlrData$`I consider myself an athlete`+mlrData$`I have many goals related to sport`+mlrData$`most of my friends are athletes`+mlrData$`Sport is the most important part of my life`+mlrData$`I spend more time thinking about sport than anything else`+mlrData$`I feel bad about myself when I do badly in sport`+mlrData$`I would be very depressed if I were injured and could not compete in sport`, data = mlrData)
-summary(fit)
 pairs(mlrData,lower.panel=NULL,)
 ```
 
 *Analysis*
+
+Its hard to determine any linear relationships from these graphhs due to the data being largely evenly spread, not indicating a positive or negative relationship between most variables. There is a strong positive linear correlation between 'AIMS_TOTAL' with all the other predictor variables, but this is to be expected because 'AIMS_TOTAL' is a comprehensive athletic identity score, and the other predictors are very similar metrics. The only variable that appears it could have a linear correlation with 'MHC-SF' is 'My goals are related to sports', where we can see a void in the lower left box, indicating some level of a negative correlation between having athletic goals and mental health, perhaps a consequence of not being able to meet those goals during the lockdown.
 
 # Regression Trees
 
@@ -196,6 +199,7 @@ The code block below prunes the tree to its optimal size, and tests the pruned v
 prune.specific <- prune.tree(specific_tree_model, best = 6)
 plot(prune.specific)
 text(prune.specific,pretty=0, cex = 0.6)
+summary(prune.specific)
 
 #getting mse for non-pruned tree
 prediction <- round(predict(specific_tree_model, newdata = testing))
@@ -210,6 +214,10 @@ mse
 ```
 
 *Analysis*
+
+Our pruned tree did significantly better on the test data than the non-pruned, meaning we can say it is the optimal size and we can analyze the pruned tree's nodes to see the variables most found to be predictive of mental health. While the non-pruned tree had nodes directly related to athletics, pruning the tree actually removes these, leaving us with only 4 variables: resilience, hours of sleep, 'there are enough people I feel close to', and 'there are plenty of people I can rely on when I have problems'. These variables could be linked to athletics, but this tree shows that athletics are not the most significant predictors of mental health.
+
+*Model Building*
 
 The code block below creates a regression tree to predict emotional wellbeing using only variables related to sports and athletics.
 
@@ -265,6 +273,8 @@ mse
 
 *Analysis*
 
+Creating a tree of only sport-related metrics both allows us to see that it actually has a lower mean squared error rate than the tree created with more metrics, and also see the sport variables considered to be the most significant predictors. 'I feel bad about myself when I do badly in sport', 'most of my friends are athletes', 'I consider myself an athlete', and 'AIMS_TOTAL' were all variables used in the pruned tree as predictors. Analyzing the predictions, we can see the best mental health comes from not letting sports/losing significantly decrease your mood, but still having a community of athlete friends. We can also see the worst mental health comes from those who are affected by losing, but also do not consider themselves athletes.
+
 # ANOVA test
 
 *Model Building*
@@ -290,6 +300,8 @@ summary(aov_results)
 ```
 
 *Analysis*
+
+Comparing the sum squares, we can see that the noise caused by residuals is significantly greater than the effect of being an athlete, and that is also represented in the p-value of 0.238, which is greater than 0.05 and thus is not statistically significant, and we cannot say that there is a significant difference between athletes and non athletes.
 
 # Multiple Linear Regression (part 2!)
 
@@ -321,6 +333,8 @@ summary(fit3)
 ```
 
 *Analysis*
+
+The added-variable plots show strong positive relationships between belonging to a community and having warm trusting relationships with emotional well-being, and a slight negative relationship between the size of your lockdown bubble and emotional well-being. Further, the p-values of the MLR shows that both metrics about having relationships were statistically significant (p\<0.05), while the size of your lockdown bubble was statistically insignificant.
 
 # Conclusions
 
