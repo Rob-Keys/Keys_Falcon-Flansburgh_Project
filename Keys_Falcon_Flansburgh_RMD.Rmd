@@ -11,73 +11,118 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Introduction
 
-The Covid-19 pandemic forced lockdowns and quarantines for nearly the entire population, and we attempt to reveal the connection between post-pandemic mental health and the level of athletics in an individual's life. We use multiple statistical techniques to analyze the data, such as linear regression, logistic regression, regression trees, and ANOVA tests. 
+The Covid-19 pandemic forced lock downs and quarantines for nearly the entire population, and we attempt to reveal the connection between post-pandemic mental health and the level of athletics in an individual's life. We use multiple statistical techniques to analyze the data, such as multiple linear regression, logistic regression, regression trees, and ANOVA tests.
 
-Our chosen dataset was collected in May of 2021 through an online questionnaire, where participants answered about their current emotional wellbeing and mental health, how athletics affected their self-identity, the impact athletics have in their life, the length of their covid isolation, and basic background information. The dataset has over 80 columns of data with 688 participants, with its large size allowing for complex analysis across data columns and an ample sample size. 
+Our chosen data set was collected in May of 2021 through an online questionnaire, where participants answered about their current emotional well being and mental health, how athletics affected their self-identity, the impact athletics have in their life, the length of their covid isolation, and basic background information. The data set has over 80 columns of data with 688 participants, and this large size allows for complex analysis across data columns and an ample sample size for analysis.
 
-Data_Sheet_1_Comparing Mental Health of Athletes and Non-athletes as They Emerge From a COVID-19 Pandemic Lockdown.CSV (figshare.com)
+[Data_Sheet_1_Comparing Mental Health of Athletes and Non-athletes as They Emerge From a COVID-19 Pandemic Lockdown.CSV (figshare.com)](https://figshare.com/articles/dataset/Data_Sheet_1_Comparing_Mental_Health_of_Athletes_and_Non-athletes_as_They_Emerge_From_a_COVID-19_Pandemic_Lockdown_CSV/14623635/1) 
 
-The code block below loads some of the needed libraries.
+The code block below loads the needed libraries and one package install as necessary.
+
 ```{r}
+
+#install.packages("car") #Uncomment and run once
+
 # Libraries
 library(readr)
 library(dplyr)
 library(ggplot2)
-
 library(tidyverse)
+library(car)
 ```
 
-The code block below imports the data from the sheet.
+The code block below imports our data from the file to a variable.
+
 ```{r}
-# Data import
 originalData <- read_csv('Data_Sheet_1_Comparing Mental Health of Athletes and Non-athletes as They Emerge From a COVID-19 Pandemic Lockdown.csv')
-head(originalData)
 ```
 
+The code block below eliminates rows with values that indicate a null or not understandable response for the 4 variables about to be used in the next code block.
 
-The code block below eliminates rows with values that indicate a null or not understandable response for emotional wellbeing on the survey.
 ```{r}
 # Data cleanup
 Data <- originalData %>% filter(originalData$`Emotional Wellbeing` < 999)
-head(Data)
+Data <- Data %>% filter(Data$`I consider myself an athlete` < 999)
+Data <- Data %>% filter(Data$`most of my friends are athletes` < 999)
+Data <- Data %>% filter(Data$`Sport is the most important part of my life` < 999)
+
+Data
 
 ```
-The code block below is a multiple linear regression to measure the effects of self-identifying as an athlete, having athlete friends, and having sports as the most important aspect of your life on the effect of emotional wellbeing.  
+
+The code block below uses multiple linear regression to measure the effects of self-identifying as an athlete, having athlete friends, and having sports as the most important aspect of your life on the effect of emotional wellbeing.
+
 ```{r}
-# MLR, Emotional Wellbeing as response variable, I consider myself an athlete, most of my friends are athletes, and Sport is the most important part of my life as predictors
-Emo_Data <- Data %>% select(`Emotional Wellbeing`, `I consider myself an athlete`, `most of my friends are athletes`, `Sport is the most important part of my life`)
-Emo_Data <- Emo_Data %>% filter(`I consider myself an athlete` < 999)
-Emo_Well_Fit <- lm(Emo_Data$`Emotional Wellbeing` ~ Emo_Data$`I consider myself an athlete` + Emo_Data$`most of my friends are athletes` + Emo_Data$`Sport is the most important part of my life`)
+Emo_Data <- Data %>% select(`Emotional Wellbeing`, `I consider myself an athlete`, `most of my friends are athletes`, `Sport is the most important part of my life`) #create a dataframe with just the relevant variables
+
+Emo_Well_Fit <- lm(Emo_Data$`Emotional Wellbeing` ~ Emo_Data$`I consider myself an athlete` + Emo_Data$`most of my friends are athletes` + Emo_Data$`Sport is the most important part of my life`) #create the model
+
 summary(Emo_Well_Fit)
-#install.packages("car")
-library(car)
-avPlots(Emo_Well_Fit)
+
+avPlots(Emo_Well_Fit) #create graphs for each variable's relationship with the predicted variable
 
 ```
-The code block below is a linear regression using weeks social distancing to predict emotional wellbeing for athletes and non-athletes, as well as plotting the results.
-```{r}
-# Emotional Wellbeing as a function of Weeks Social Distancing 
 
+The code block below uses linear regression to predict emotional wellbeing for athletes and non-athletes using weeks spent social distancing, as well as plotting the results.
+
+```{r}
 ggplot(Data, aes(x=Data$`Weeks Social Distancing`, y=Data$`Emotional Wellbeing`, color=factor(Data$`Athlete/Non-Athlete`)))+
 geom_point()+
-geom_smooth(method=lm, se=FALSE)
+geom_smooth(method=lm, se=FALSE)+
+scale_color_manual(name="",values = c("coral", "blue"), labels = c('Athletes', 'Non-Athletes')) #cleans up legend
 
 Emo_Weeks_Fit <- lm(Data$`Emotional Wellbeing` ~ Data$`Weeks Social Distancing`*as.factor(Data$`Athlete/Non-Athlete`), data = Data)
 summary(Emo_Weeks_Fit)
 ```
-The code block below creates a logistic regression model to predict a comprehensive emotional well-being statistic using various athletic data points as predictors. Also used pairs() to compare the relationships between all variables. 
-```{r}
-# MLR with "MHC-SF" as the variable were predicting, and every athletic-related variable as predictors
-mlrData <- originalData %>% select(`MHC-SF OVERALL`,`AIMS_ TOTAL`,`I consider myself an athlete`,`I have many goals related to sport`,`most of my friends are athletes`,`Sport is the most important part of my life`,`I spend more time thinking about sport than anything else`,`I feel bad about myself when I do badly in sport`,`I would be very depressed if I were injured and could not compete in sport`)
-mlrData <- mlrData %>% filter(`AIMS_ TOTAL` <= 100, `MHC-SF OVERALL` <= 100,`I consider myself an athlete`<= 100,`I have many goals related to sport`<= 100,`most of my friends are athletes`<= 100,`Sport is the most important part of my life`<= 100,`I spend more time thinking about sport than anything else`<= 100,`I feel bad about myself when I do badly in sport`<= 100,`I would be very depressed if I were injured and could not compete in sport`<= 100)
 
-fit <- glm(mlrData$`MHC-SF OVERALL` ~ mlrData$`AIMS_ TOTAL`+mlrData$`I consider myself an athlete`+mlrData$`I have many goals related to sport`+mlrData$`most of my friends are athletes`+mlrData$`Sport is the most important part of my life`+mlrData$`I spend more time thinking about sport than anything else`+mlrData$`I feel bad about myself when I do badly in sport`+mlrData$`I would be very depressed if I were injured and could not compete in sport`, data = mlrData)
+The code block below creates a dataset clean of null/unusable data for the desired variables. It then splits it into training and testing data for the model to use.
+
+```{r}
+logData = originalData %>% select(`Athlete/Non-Athlete`,`Emotional Wellbeing`,`Social Wellbeing`,`Psychological Wellbeing`)
+
+logData = logData %>% filter(logData$`Athlete/Non-Athlete` < 999)
+logData = logData %>% filter(logData$`Emotional Wellbeing` < 999)
+logData = logData %>% filter(logData$`Social Wellbeing` < 999)
+logData = logData %>% filter(logData$`Psychological Wellbeing` < 999)
+
+train <- sample(1:nrow(logData), nrow(logData)*0.75)
+log_train <- logData[train, ]
+log_test <- logData[-train, ]
+```
+
+This code block creates a logistic regression model using 3 "well-being" measures to attempt to predict whether the respondent is an athlete or non/athlete, and then tests the accuracy of the model.
+
+```{r}
+log_model <- glm(as.factor(`Athlete/Non-Athlete`) ~ `Emotional Wellbeing` + `Social Wellbeing` + `Psychological Wellbeing`, data = log_train, family = binomial())
+summary(log_model)
+
+test_pred <- predict(log_model, testing, type = "response")
+prediction <- ifelse(test_pred > 0.5, 1, 0)
+
+confusion_matrix <- table(Predicted = prediction, Actual = testing$`Athlete/Non-Athlete`)
+confusion_matrix
+```
+
+This code block creates and filters the data to the necessary variables for our future multiple line regression.
+
+```{r}
+mlrData <- originalData %>% select(`MHC-SF OVERALL`,`AIMS_ TOTAL`,`I consider myself an athlete`,`I have many goals related to sport`,`most of my friends are athletes`,`Sport is the most important part of my life`,`I spend more time thinking about sport than anything else`,`I feel bad about myself when I do badly in sport`,`I would be very depressed if I were injured and could not compete in sport`)
+
+mlrData <- mlrData %>% filter(`AIMS_ TOTAL` <= 100, `MHC-SF OVERALL` <= 100,`I consider myself an athlete`<= 100,`I have many goals related to sport`<= 100,`most of my friends are athletes`<= 100,`Sport is the most important part of my life`<= 100,`I spend more time thinking about sport than anything else`<= 100,`I feel bad about myself when I do badly in sport`<= 100,`I would be very depressed if I were injured and could not compete in sport`<= 100)
+```
+
+This code block creates a multiple line regression model that attempts to find the relationship between a comprehensive metric of mental health and athletic identity-relating variables
+
+```{r}
+
+fit <- lm(mlrData$`MHC-SF OVERALL` ~ mlrData$`AIMS_ TOTAL`+mlrData$`I consider myself an athlete`+mlrData$`I have many goals related to sport`+mlrData$`most of my friends are athletes`+mlrData$`Sport is the most important part of my life`+mlrData$`I spend more time thinking about sport than anything else`+mlrData$`I feel bad about myself when I do badly in sport`+mlrData$`I would be very depressed if I were injured and could not compete in sport`, data = mlrData)
 summary(fit)
 pairs(mlrData,lower.panel=NULL,)
 ```
-The code block below does some additional cleaning of the data and splits it into a training set and a test set for use in regression trees.
+
+The code block below does some additional cleaning of the data, selecting usable columns, and splits it into a training set and a test set for use in regression trees.
+
 ```{r warning=FALSE}
-# Clean the data of columns with a lot of missing data or unusable data, then remove all rows with a missing value
 cleanData = originalData[c(2,3,4,7,8,9,10,12,14:27,34:84)]
 for(i in 1:73){
   cleanData = cleanData %>% filter(cleanData[i] < 100)
@@ -86,31 +131,18 @@ train <- sample(1:nrow(cleanData), nrow(cleanData)*0.75)
 training = cleanData[train,]
 testing = cleanData[-train,]
 ```
-The code block below creates a regression tree to predict emotional wellbeing using all available variables.
-```{r warning=FALSE}
-library(tree)
-tree_model <- tree(cleanData$`Emotional Wellbeing` ~ cleanData$`Gender:` + cleanData$`Age Group:` + cleanData$`Country During Lockdown` + cleanData$`Marital Status:` + cleanData$`Smoking Status:` + cleanData$`Five Fruit and Veg` + cleanData$`Hours sleep:` + cleanData$`Shielded?` + cleanData$`Weeks Social Distancing` + cleanData$`# in lockdown bubble:` + cleanData$`Athlete/Non-Athlete` + cleanData$`AIMS_ TOTAL` + cleanData$`Social Identity` + cleanData$`I consider myself an athlete` + cleanData$`I have many goals related to sport` + cleanData$`most of my friends are athletes` + cleanData$`Exclusivity` + cleanData$`Sport is the most important part of my life` + cleanData$`I spend more time thinking about sport than anything else` + cleanData$`Negative Affectivity` + cleanData$`I feel bad about myself when I do badly in sport` + cleanData$`I would be very depressed if I were injured and could not compete in sport` + cleanData$`MHC-SF OVERALL` + cleanData$`Happy` + cleanData$`Interested in life` + cleanData$`Satisfied` + cleanData$`Social Wellbeing` + cleanData$`That you had something important to contribute to society` + cleanData$`That you belonged to a community (like a social group or your neighbourhood)` + cleanData$`That our society is becoming a better place for people like you` + cleanData$`That people are basically good` + cleanData$`That the way our society works makes sense to you` + cleanData$`Psychological Wellbeing` + cleanData$`That you liked most parts of your personality` + cleanData$`Good at managing the responsibilities of your daily life` + cleanData$`That you had warm and trusting relationships with others` + cleanData$`That you had experiences that challenged you to grow and become a better person` + cleanData$`Confident to think or express your own ideas and opinions` + cleanData$`That your life has a sense of direction or meaning to it` + cleanData$`HADS OVERALL` + cleanData$`HADS-A AVERAGE` + cleanData$`HADS-D AVERAGE` + cleanData$`I feel tense or 'wound up':` + cleanData$`I still enjoy the things I used to enjoy:` + cleanData$`I get a sort of frightened feeling as if something awful is about to happen:` + cleanData$`I can laugh and see the funny side of things:` + cleanData$`Worrying thoughts go through my mind:` + cleanData$`I feel cheerful:` + cleanData$`I can sit at ease and feel relaxed:` + cleanData$`I feel as if I am slowed down:` + cleanData$`I get a sort of frightened feeling like 'butterflies' in my stomach:` + cleanData$`I have lost interest in my appearance:` + cleanData$`I feel restless as I have to be on the move:` + cleanData$`I look forward with enjoyment to things:` + cleanData$`I get sudden feelings of panic:` + cleanData$`I can enjoy a good book or radio or TV programme:` + cleanData$`RES_TOTAL` + cleanData$`I tend to bounce back quickly after hard times` + cleanData$`I have a hard time making it through stressful events*` + cleanData$`It does not take me long to recover from a stressful event` + cleanData$`It is hard for me to snap back when something bad happens*` + cleanData$`I usually come through difficult times with little trouble` + cleanData$`I tend to take a long time to get over setbacks in my life*` + cleanData$`LONE_ TOTAL` + cleanData$`LONE_ Emotional` + cleanData$`LONE_ Social` + cleanData$`I experience a general sense of emptiness` + cleanData$`I miss having people around` + cleanData$`There are many people I can trust completely*` + cleanData$`I often feel rejected` + cleanData$`There are enough people I feel close to*` + cleanData$`There are plenty of people I can rely on when I have problems*`, data = training)
-plot(tree_model)
-text(tree_model,pretty=0,cex=0.7)
-summary(tree_model)
-```
-The code block below uses cross-validation to confirm that the regression tree above cannot be improved upo by pruning.
-```{r warning=FALSE}
-#cross-validation of the above tree
-cv.tree <- cv.tree(tree_model)
-cv.tree
-plot(cv.tree$size,cv.tree$dev,type='b')
-```
-The code block below creates a regression tree to predict emotional wellbeing using all minus those too similar to emotional wellbeing.
+
+The code block below creates a regression tree to predict "emotional wellbeing" using all available predictors, minus those too similar to emotional wellbeing to be useful.
 
 ```{r warning=FALSE}
 specific_tree_model <- tree(cleanData$`Emotional Wellbeing` ~ cleanData$`Gender:` + cleanData$`Age Group:` + cleanData$`Country During Lockdown` + cleanData$`Marital Status:` + cleanData$`Smoking Status:` + cleanData$`Five Fruit and Veg` + cleanData$`Hours sleep:` + cleanData$`Shielded?` + cleanData$`Weeks Social Distancing` + cleanData$`# in lockdown bubble:` + cleanData$`Athlete/Non-Athlete` + cleanData$`AIMS_ TOTAL` + cleanData$`Social Identity` + cleanData$`I consider myself an athlete` + cleanData$`I have many goals related to sport` + cleanData$`most of my friends are athletes` + cleanData$`Exclusivity` + cleanData$`Sport is the most important part of my life` + cleanData$`I spend more time thinking about sport than anything else` + cleanData$`Negative Affectivity` + cleanData$`I feel bad about myself when I do badly in sport` + cleanData$`I would be very depressed if I were injured and could not compete in sport` + cleanData$`RES_TOTAL` + cleanData$`I tend to bounce back quickly after hard times` + cleanData$`I have a hard time making it through stressful events*` + cleanData$`It does not take me long to recover from a stressful event` + cleanData$`It is hard for me to snap back when something bad happens*` + cleanData$`I usually come through difficult times with little trouble` + cleanData$`I tend to take a long time to get over setbacks in my life*` + cleanData$`I miss having people around` + cleanData$`There are many people I can trust completely*` + cleanData$`There are enough people I feel close to*` + cleanData$`There are plenty of people I can rely on when I have problems*`, data = training)
 plot(specific_tree_model)
-text(specific_tree_model,pretty=0,cex=0.7)
+text(specific_tree_model,pretty=0,cex=0.6)
 summary(specific_tree_model)
 ```
 
-The code block below cross-validates the above  tree to determine the optimal size.
+The code block below cross-validates the above tree to determine the optimal size.
+
 ```{r warning=FALSE}
 #cross-validation of the above tree
 cv.specific <- cv.tree(specific_tree_model)
@@ -118,7 +150,8 @@ cv.specific
 plot(cv.specific$size,cv.specific$dev,type='b')
 ```
 
-The code block below prunes the tree to its optimal size.
+The code block below prunes the tree to its optimal size, and tests the pruned vs non-pruned trees to prove its optimization.
+
 ```{r warning=FALSE}
 #pruning the above tree
 
@@ -126,44 +159,51 @@ prune.specific <- prune.tree(specific_tree_model, best = 6)
 plot(prune.specific)
 text(prune.specific,pretty=0, cex = 0.6)
 
+#getting mse for non-pruned tree
+prediction <- round(predict(specific_tree_model, newdata = testing))
+mse <- mean((testing$`Emotional Wellbeing` - prediction)^2)
+print("Testing mse of non-pruned tree")
+mse
 #getting mse for pruned tree
 prediction <- round(predict(prune.specific, newdata = testing))
 mse <- mean((testing$`Emotional Wellbeing` - prediction)^2)
 print("Testing mse of pruned tree")
 mse
 ```
+
 The code block below creates a regression tree to predict emotional wellbeing using only variables related to sports and athletics.
+
 ```{r warning=FALSE}
 #this tree only uses predictors that are related to sports and athletics
 morespecific_tree_model <- tree(cleanData$`Emotional Wellbeing` ~ cleanData$`Athlete/Non-Athlete` + cleanData$`AIMS_ TOTAL` + cleanData$`I consider myself an athlete` + cleanData$`I have many goals related to sport` + cleanData$`most of my friends are athletes` + cleanData$`Sport is the most important part of my life` + cleanData$`I spend more time thinking about sport than anything else` + cleanData$`I feel bad about myself when I do badly in sport` + cleanData$`I would be very depressed if I were injured and could not compete in sport`, data = training)
+
 plot(morespecific_tree_model)
 text(morespecific_tree_model,pretty=0,cex=0.7)
 summary(morespecific_tree_model)
-
-#getting mean square error rate
-prediction = round(predict(morespecific_tree_model, newdata = testing))
-mse <- mean((testing$`Emotional Wellbeing` - prediction)^2)
-print("Testing mse of non-pruned tree")
-mse
 ```
 
+The code below cross-validates and prunes the tree to its optimal size, as well as a third tree that was pruned to a manually selected value that is experimentally more accurate. Then tests all 3 models for their MSE.
 
-The code below cross-validates and prunes the tree to its optimal size.
 ```{r warning=FALSE}
 #finding optimal tree size
 cv.tree(morespecific_tree_model)
 tree_size = c(6,5,4,3,1)
 optimalSize=c()
-for(i in 1:100){
+#for(i in 1:100){
   optimalSize = c(optimalSize,tree_size[which.min(cv.tree(morespecific_tree_model)$dev)])
-}
+#}
 table(optimalSize)
+
+#getting mean square error rate for non-pruned tree
+prediction = round(predict(morespecific_tree_model, newdata = testing))
+mse <- mean((testing$`Emotional Wellbeing` - prediction)^2)
+print("Testing mse of non-pruned tree")
+mse
 
 #creating pruned tree
 newtree=prune.tree(morespecific_tree_model,best=5)
 plot(newtree)
 text(newtree,pretty=0,cex=0.7)
-summary(newtree)
 
 #getting mse for pruned tree
 prediction = round(predict(newtree, newdata = testing))
@@ -175,7 +215,6 @@ mse
 manualTree=prune.tree(morespecific_tree_model,best=3)
 plot(manualTree)
 text(manualTree,pretty=0,cex=0.7)
-summary(manualTree)
 
 #getting mse for pruned tree
 prediction = round(predict(manualTree, newdata = testing))
@@ -183,7 +222,9 @@ mse <- mean((testing$`Emotional Wellbeing` - prediction)^2)
 print("Testing mse of manually pruned tree")
 mse
 ```
-The code below uses an ANOVA to see if there is a signifcant difference in the means of Emotional Wellbeing for Athletes vs. Non-Athletes.
+
+The code below uses an ANOVA test to see if there is a significant difference in the means of Emotional Wellbeing for Athletes vs. Non-Athletes.
+
 ```{r warning=FALSE}
 #ANOVA Comparison between the mean well being of non athletes and the mean well being of athletes
 cleanData$`Athlete/Non-Athlete`[cleanData$`Athlete/Non-Athlete` == 1] <- "Athlete"
@@ -193,6 +234,7 @@ aov_results <- aov(cleanData$`Emotional Wellbeing` ~ factor(cleanData$`Athlete/N
 summary(aov_results)
 boxplot(cleanData$`Emotional Wellbeing` ~ factor(cleanData$`Athlete/Non-Athlete`), col = c("red", "blue"))
 ```
+
 The code below uses an ANOVA to see if there is a signifcant difference in the means of Resiliency Total for Athletes vs. Non-Athletes.
 
 ```{r warning=FALSE}
@@ -200,7 +242,9 @@ The code below uses an ANOVA to see if there is a signifcant difference in the m
 aov_results <- aov(cleanData$`RES_TOTAL` ~ factor(cleanData$`Athlete/Non-Athlete`))
 summary(aov_results)
 ```
-The code below runs a multiple linear regression with Emotional Wellbeing as the response variable and beloning to a community, the number of people in the lockdown bubble, and having trusting relationships as the predictors.
+
+The code below runs a multiple linear regression with Emotional Wellbeing as the response variable and belonging to a community, the number of people in the lockdown bubble, and having trusting relationships as the predictors.
+
 ```{r warning=FALSE}
 #MLR
 fit <- lm(cleanData$`Emotional Wellbeing` ~ cleanData$`That you belonged to a community (like a social group or your neighbourhood)` + cleanData$`# in lockdown bubble:` + cleanData$`That you had warm and trusting relationships with others`)
@@ -208,7 +252,9 @@ summary(fit)
 
 avPlots(fit)
 ```
+
 The code below checks to see if backwards elimination would improve the model above.
+
 ```{r warning=FALSE}
 #MLR backwards elim
 fit1 <- lm(cleanData$`Emotional Wellbeing` ~ + cleanData$`# in lockdown bubble:` + cleanData$`That you had warm and trusting relationships with others`)
@@ -222,6 +268,6 @@ summary(fit3)
 
 ```
 
+# Conclusions
 
-#Conclusions
-Athletes were no more or less likely to have mental health struggles in the wake of the COVID-19 pandemic. The linear regression for emotional wellbeing as a function of how important sports were to the person had an R^2 below 0.1 as did the regression model using weeks social distancing by athlete vs. non-athlete. The ANOVA tests had p-values above 0.2 so they did not show any significant difference between athletes vs. non-athletes. The regression tree with no limiting parameters and the tree with only some limiting parameters simply based the decision for emotional wellbeing off predictors like happiness or emotional resiliency, which is not useful data since there was no significant difference in those factors between athletes and non-athletes. The regression tree using only athletic parameters had a mean squared error of 9.54, which given that the maximum emotional wellbeing in the data is 15, is very high. The linear regression using belonging to a community, the number of people in the lockdown bubble, and feeling like they have loving relationships had an R^2 of 0.408, which shows some correlation. The main conclusion drawn given this data is that despite the inability to play sports during the lockdown, athletes did not suffer more emotional problems than non-athletes, and factors like their community, and their general wellbeing were far more important.
+Athletes were not significantly more or less likely to have mental health struggles in the wake of the COVID-19 pandemic. The linear regression for emotional wellbeing as a function of how important sports were to the person had an R\^2 below 0.1 as did the regression model using weeks social distancing by athlete vs. non-athlete. The ANOVA tests had p-values above 0.2 so they did not show any significant difference between athletes vs. non-athletes. The regression tree with no limiting parameters and the tree with only some limiting parameters simply based the decision for emotional wellbeing off predictors like happiness or emotional resiliency, which is not useful data since there was no significant difference in those factors between athletes and non-athletes. The regression tree using only athletic parameters had a mean squared error of 9.54, which given that the maximum emotional wellbeing in the data is 15, is very high. The linear regression using belonging to a community, the number of people in the lockdown bubble, and feeling like they have loving relationships had an R\^2 of 0.408, which shows some correlation. The main conclusion drawn given this data is that despite the inability to play sports during the lockdown, athletes did not suffer more emotional problems than non-athletes, and factors like their community, and their general wellbeing were far more important.
