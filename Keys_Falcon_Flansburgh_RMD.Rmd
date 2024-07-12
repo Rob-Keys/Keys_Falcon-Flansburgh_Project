@@ -29,6 +29,7 @@ library(dplyr)
 library(ggplot2)
 library(tidyverse)
 library(car)
+library(tree)
 ```
 
 The code block below imports our data from the file to a variable.
@@ -120,16 +121,16 @@ This code block creates a logistic regression model using 3 "well-being" measure
 log_model <- glm(as.factor(`Athlete/Non-Athlete`) ~ `Emotional Wellbeing` + `Social Wellbeing` + `Psychological Wellbeing`, data = log_train, family = binomial())
 summary(log_model)
 
-test_pred <- predict(log_model, testing, type = "response")
+test_pred <- predict(log_model, log_test, type = "response")
 prediction <- ifelse(test_pred > 0.50, 1, 0)
 
-confusion_matrix <- table(Predicted = prediction, Actual = testing$`Athlete/Non-Athlete`)
+confusion_matrix <- table(Predicted = prediction, Actual = log_test$`Athlete/Non-Athlete`)
 confusion_matrix
 ```
 
 *Analysis*
 
-Interpreting the coefficients of our log model shows that per unit increase in emotional wellbeing, the log odds of the individual being an athlete decreases by 0.009, per unit increase in social wellbeing, the log odds of being an athlete increase by 0.024, and per unit increase in psychological wellbeing, the log odds decrease by 0.015. This would suggest that athletes have better social well-being, potentially due team sports and sports communities, but they also have worse emotional and psychological wellbeing coming out of the lockdown. However, none of tbe p values are significant (\<0.05), and therefore we cannot draw conclusions from the data.
+Interpreting the coefficients of our log model shows that per unit increase in emotional wellbeing, the log odds of the individual being an athlete increases by 0.018, per unit increase in social wellbeing, the log odds of being an athlete increase by 0.042, and per unit increase in psychological wellbeing, the log odds decrease by 0.036. This would suggest that athletes have better social well-being, potentially due team sports and sports communities, but they also have worse emotional and psychological wellbeing coming out of the lockdown. However, none of the p values are significant (\<0.05), and therefore we cannot draw conclusions from the data.
 
 # Paired variables graphs
 
