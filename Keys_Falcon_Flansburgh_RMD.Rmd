@@ -37,6 +37,8 @@ The code block below imports our data from the file to a variable.
 originalData <- read_csv('Data_Sheet_1_Comparing Mental Health of Athletes and Non-athletes as They Emerge From a COVID-19 Pandemic Lockdown.csv')
 ```
 
+# Multiple Linear Regression
+
 The code block below eliminates rows with values that indicate a null or not understandable response for the 4 variables about to be used in the next code block.
 
 ```{r}
@@ -63,6 +65,8 @@ avPlots(Emo_Well_Fit) #create graphs for each variable's relationship with the p
 
 ```
 
+# Linear Regression
+
 The code block below uses linear regression to predict emotional wellbeing for athletes and non-athletes using weeks spent social distancing, as well as plotting the results.
 
 ```{r}
@@ -74,6 +78,8 @@ scale_color_manual(name="",values = c("coral", "blue"), labels = c('Athletes', '
 Emo_Weeks_Fit <- lm(Data$`Emotional Wellbeing` ~ Data$`Weeks Social Distancing`*as.factor(Data$`Athlete/Non-Athlete`), data = Data)
 summary(Emo_Weeks_Fit)
 ```
+
+# Logistic Regression
 
 The code block below creates a dataset clean of null/unusable data for the desired variables. It then splits it into training and testing data for the model to use.
 
@@ -103,6 +109,8 @@ confusion_matrix <- table(Predicted = prediction, Actual = testing$`Athlete/Non-
 confusion_matrix
 ```
 
+# Multiple Linear Regression
+
 This code block creates and filters the data to the necessary variables for our future multiple line regression.
 
 ```{r}
@@ -119,6 +127,8 @@ fit <- lm(mlrData$`MHC-SF OVERALL` ~ mlrData$`AIMS_ TOTAL`+mlrData$`I consider m
 summary(fit)
 pairs(mlrData,lower.panel=NULL,)
 ```
+
+# Regression Trees
 
 The code block below does some additional cleaning of the data, selecting usable columns, and splits it into a training set and a test set for use in regression trees.
 
@@ -223,6 +233,8 @@ print("Testing mse of manually pruned tree")
 mse
 ```
 
+# ANOVA test
+
 The code below uses an ANOVA test to see if there is a significant difference in the means of Emotional Wellbeing for Athletes vs. Non-Athletes.
 
 ```{r warning=FALSE}
@@ -242,6 +254,8 @@ The code below uses an ANOVA to see if there is a signifcant difference in the m
 aov_results <- aov(cleanData$`RES_TOTAL` ~ factor(cleanData$`Athlete/Non-Athlete`))
 summary(aov_results)
 ```
+
+# Multiple Linear Regression (part 2!)
 
 The code below runs a multiple linear regression with Emotional Wellbeing as the response variable and belonging to a community, the number of people in the lockdown bubble, and having trusting relationships as the predictors.
 
