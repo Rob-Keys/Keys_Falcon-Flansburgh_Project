@@ -39,6 +39,8 @@ originalData <- read_csv('Data_Sheet_1_Comparing Mental Health of Athletes and N
 
 # Multiple Linear Regression
 
+*Data cleaning*
+
 The code block below eliminates rows with values that indicate a null or not understandable response for the 4 variables about to be used in the next code block.
 
 ```{r}
@@ -52,6 +54,8 @@ Data
 
 ```
 
+*Model Building*
+
 The code block below uses multiple linear regression to measure the effects of self-identifying as an athlete, having athlete friends, and having sports as the most important aspect of your life on the effect of emotional wellbeing.
 
 ```{r}
@@ -64,6 +68,9 @@ summary(Emo_Well_Fit)
 avPlots(Emo_Well_Fit) #create graphs for each variable's relationship with the predicted variable
 
 ```
+
+*Analysis*
+Looking at the individual variable graphs, we can see a slight positive correlation between both 'I consider myself an athlete' and 'Most of my friends are athletes' with Emotional well being, and a slight negative correlation between 'Sport is the most important part of my life' with Emotional well being. By comparing the p values to 0.05 to determine significance, we can see that both 'I consider myself an athlete' and 'Sport is the most important part of my life' are significant, and we can say they impact emotional well being. Despite both being sport-related metrics, we can see that they have opposite signs, indicating that they have opposite effects on emotional well being, which makes sense that being an athlete and working out will improve your mental health, but valuing a sport above all else and then not being able to play during the lockdown would negatively affect you.
 
 # Linear Regression
 
