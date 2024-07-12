@@ -68,12 +68,12 @@ summary(Emo_Weeks_Fit)
 The code block below creates a logistic regression model to predict a comprehensive emotional well-being statistic using various athletic data points as predictors. Also used pairs() to compare the relationships between all variables. 
 ```{r}
 # MLR with "MHC-SF" as the variable were predicting, and every athletic-related variable as predictors
-ai <- originalData %>% select(`MHC-SF OVERALL`,`AIMS_ TOTAL`,`I consider myself an athlete`,`I have many goals related to sport`,`most of my friends are athletes`,`Sport is the most important part of my life`,`I spend more time thinking about sport than anything else`,`I feel bad about myself when I do badly in sport`,`I would be very depressed if I were injured and could not compete in sport`)
-ai <- ai %>% filter(`AIMS_ TOTAL` <= 100, `MHC-SF OVERALL` <= 100,`I consider myself an athlete`<= 100,`I have many goals related to sport`<= 100,`most of my friends are athletes`<= 100,`Sport is the most important part of my life`<= 100,`I spend more time thinking about sport than anything else`<= 100,`I feel bad about myself when I do badly in sport`<= 100,`I would be very depressed if I were injured and could not compete in sport`<= 100)
+mlrData <- originalData %>% select(`MHC-SF OVERALL`,`AIMS_ TOTAL`,`I consider myself an athlete`,`I have many goals related to sport`,`most of my friends are athletes`,`Sport is the most important part of my life`,`I spend more time thinking about sport than anything else`,`I feel bad about myself when I do badly in sport`,`I would be very depressed if I were injured and could not compete in sport`)
+mlrData <- mlrData %>% filter(`AIMS_ TOTAL` <= 100, `MHC-SF OVERALL` <= 100,`I consider myself an athlete`<= 100,`I have many goals related to sport`<= 100,`most of my friends are athletes`<= 100,`Sport is the most important part of my life`<= 100,`I spend more time thinking about sport than anything else`<= 100,`I feel bad about myself when I do badly in sport`<= 100,`I would be very depressed if I were injured and could not compete in sport`<= 100)
 
-fit <- glm(ai$`MHC-SF OVERALL` ~ ai$`AIMS_ TOTAL`+ai$`I consider myself an athlete`+ai$`I have many goals related to sport`+ai$`most of my friends are athletes`+ai$`Sport is the most important part of my life`+ai$`I spend more time thinking about sport than anything else`+ai$`I feel bad about myself when I do badly in sport`+ai$`I would be very depressed if I were injured and could not compete in sport`, data = ai)
+fit <- glm(mlrData$`MHC-SF OVERALL` ~ mlrData$`AIMS_ TOTAL`+mlrData$`I consider myself an athlete`+mlrData$`I have many goals related to sport`+mlrData$`most of my friends are athletes`+mlrData$`Sport is the most important part of my life`+mlrData$`I spend more time thinking about sport than anything else`+mlrData$`I feel bad about myself when I do badly in sport`+mlrData$`I would be very depressed if I were injured and could not compete in sport`, data = mlrData)
 summary(fit)
-pairs(ai,lower.panel=NULL,)
+pairs(mlrData,lower.panel=NULL,)
 ```
 The code block below does some additional cleaning of the data and splits it into a training set and a test set for use in regression trees.
 ```{r warning=FALSE}
